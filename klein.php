@@ -5,6 +5,12 @@
 $__routes = array();
 $__namespace = null;
 
+// Smarty
+$smarty = new Smarty();
+$smarty->setCacheDir(ROOT . '../cache/');
+$smarty->setTemplateDir(ROOT . '../cache/templates/');
+$smarty->setCompileDir(ROOT . '../cache/templates_c/');
+
 // Add a route callback
 function respond($method, $route = '*', $callback = null) {
     global $__routes, $__namespace;
@@ -601,19 +607,29 @@ class _Response extends StdClass {
         require $this->_view;
     }
 
+    // assign a variable to the template
+    public function assign($key, $value) {
+        global $smarty;
+        $smarty->assign($key, $value);
+    }
+
     // Renders a view + optional layout
     public function render($view, array $data = array()) {
+        global $smarty;
+
         $original_view = $this->_view;
 
         if (!empty($data)) {
             $this->set($data);
         }
         $this->_view = $view;
-        if (null === $this->_layout) {
+        /* if (null === $this->_layout) {
             $this->yield();
         } else {
             require $this->_layout;
-        }
+        } */
+        $smarty->display(ROOT . '../private/templates/' . $view . '.tpl');
+
         if (false !== $this->chunked) {
             $this->chunk();
         }
